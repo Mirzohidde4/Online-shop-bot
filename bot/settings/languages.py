@@ -1,0 +1,38 @@
+languages = {
+    'uz': {
+        'start': f"👋 Assalomu Alaykum {'full_name'}, buyurtma berishingiz mumkin!",
+        'main': '📋 Asosiy menyu',
+        'product_btn': '🛒 Mahsulotlar',
+        'set_lang': '🌍 Tilni o\'zgartirish',
+        'info': 'ℹ️ Ma\'lumotlar',
+        'lang_text': '🇺🇿 Hozirgi til O\'zbek tilidir',
+        'lang_ru': '🇷🇺 Rus tiliga o\'zgartirish',
+        'lang_en': '🇬🇧 Ingliz tiliga o\'zgartirish',
+        'back': '🔙 Orqaga',
+        'category_txt': 'Mahsulot turlari',
+    },
+    'ru': {
+        'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
+        'main': '📋 Главное меню',
+        'product_btn': '🛒 Продукты',
+        'set_lang': '🌍 Изменить язык',
+        'info': 'ℹ️ Информация',
+        'lang_text': '🇷🇺 Текуший язык русский',
+        'lang_uz': '🇺🇿 Изменить язык на узбекский',
+        'lang_en': '🇬🇧 Изменить язык на английский',
+        'back': '🔙 Назад',
+        'category_txt': 'Категории продуктов',
+    },
+    'en': {
+        'start': f"👋 Hello {'full_name'}, you can place an order!",
+        'main': '📋 Main menu',
+        'product_btn': '🛒 Products',
+        'set_lang': '🌍 Set language',
+        'info': 'ℹ️ Information',
+        'lang_text': '🇬🇧 Current language is English',
+        'lang_uz': '🇺🇿 Change language to Uzbek',
+        'lang_ru': '🇷🇺 Change language to Russian',
+        'back': '🔙 Back',
+        'category_txt': 'Categories',
+    }
+}
