@@ -10,8 +10,10 @@ def put_category_text(sender, created, instance, **kwargs):
     if created:
         name = instance.name_uz
         try:
-            if not instance.name_ru: instance.name_ru = GoogleTranslator(source='auto', target='ru').translate(name)
-            if not instance.name_en: instance.name_en = GoogleTranslator(source='auto', target='en').translate(name)
+            if not instance.name_ru: 
+                instance.name_ru = GoogleTranslator(source='auto', target='ru').translate(name)
+            if not instance.name_en: 
+                instance.name_en = GoogleTranslator(source='auto', target='en').translate(name)
             instance.save()
-        except:
-            pass
+        except Exception as error:
+            print("Category error: ", error)

@@ -33,7 +33,6 @@ class ProductMod(models.Model):
     name = models.CharField(verbose_name='nomi', max_length=100)
     price = models.PositiveIntegerField(verbose_name='narxi')
     photo = models.ImageField(verbose_name='rasmi', upload_to='media/products/', null=True, blank=True)
-    description = models.TextField(verbose_name='ma\'lumot', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -41,3 +40,18 @@ class ProductMod(models.Model):
     class Meta:
         verbose_name = 'Mahsulot'
         verbose_name_plural = 'Mahsulotlar'
+
+
+class BasketMod(models.Model):
+    user = models.PositiveBigIntegerField(verbose_name='foydalanuvchi id')
+    product_name = models.ForeignKey(to=ProductMod, on_delete=models.CASCADE, verbose_name='mahsulot')
+    category = models.CharField(verbose_name='turi', max_length=100)    
+    count = models.PositiveIntegerField(verbose_name='soni', default=1)  
+
+
+    def __str__(self):
+        return self.product_name 
+
+    class Meta: 
+        verbose_name = 'Savat'
+        verbose_name_plural = 'Savatlar'

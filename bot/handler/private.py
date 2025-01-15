@@ -4,11 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.command import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from asgiref.sync import sync_to_async
-from main.models import UserMod, CategoryMod, ProductMod
+from main.models import UserMod, CategoryMod, ProductMod, BasketMod
 from ..settings.states import UserState
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
-from ..settings.functions import get_user_language
+from ..settings.functions import get_user_language, send_products_by_category, get_main_button
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
@@ -26,11 +26,11 @@ async def command_start(message: Message):
     
     if not user_filter: await sync_to_async(UserMod.objects.create)(user_id=user_id, user_name=username, full_name=full_name, language='uz')
     await message.answer(text=lang['start'].replace('full_name', full_name), 
-        reply_markup=CreateInline({lang['product_btn']:'get_products', lang['set_lang']:f"set_language", lang['info']:'get_information'}, just=(1, 2)))
+        reply_markup=get_main_button(lang=lang))
 
 
 @user_private_router.callback_query(F.data == 'get_products')
-async def get_products(call: CallbackQuery):
+async def get_categorys(call: CallbackQuery):
     user_id = call.from_user.id
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
     category_filter = await sync_to_async(list)(CategoryMod.objects.all())
@@ -74,17 +74,44 @@ async def change_language(call: CallbackQuery):
     if action in ['uz', 'ru', 'en']:
         await sync_to_async(UserMod.objects.filter(user_id=user_id).update)(language=action)
         lang = languages[action]
-        await call.message.answer(text=lang['main'], reply_markup=CreateInline({lang['product_btn']:'get_products', 
-            lang['set_lang']:'set_language', lang['info']:'get_information'}, just=(1, 2)))
+        await call.message.answer(text=lang['lang_changed'], reply_markup=ReplyKeyboardRemove())
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
     elif action == 'back':
         lang = await get_user_language(user_id)
-        await call.message.answer(text=lang['main'], reply_markup=CreateInline({lang['product_btn']:'get_products', 
-            lang['set_lang']:'set_language', lang['info']:'get_information'}, just=(1, 2)))
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
 
 
 @user_private_router.message(lambda message: message.text in ['🔙 Back', '🔙 Назад', '🔙 Orqaga'])
 async def get_back(message: Message):
-        user_id = message.from_user.id
-        lang = await get_user_language(user_id)
-        await message.answer(text=lang['main'], reply_markup=CreateInline({lang['product_btn']:'get_products', 
-            lang['set_lang']:'set_language', lang['info']:'get_information'}, just=(1, 2)))
+    user_id = message.from_user.id
+    lang = await get_user_language(user_id)
+    await message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+
+
+@user_private_router.message(F.text)
+async def get_products(message: Message):
+    category = message.text
+    user_id = message.from_user.id
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
+
+    if user_filter.language == 'uz':
+        category_filter = await sync_to_async(CategoryMod.objects.filter(name_uz=category).first)()
+    if user_filter.language == 'ru':
+        category_filter = await sync_to_async(CategoryMod.objects.filter(name_ru=category).first)()
+    if user_filter.language == 'en':
+        category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
+    
+    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language, status=False)
+
+
+@user_private_router.callback_query(lambda c: c.data.startswith("category_"))
+async def pagination_callback(call: CallbackQuery):
+    action = call.data.split("_")
+    category_id = int(action[1])
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=call.from_user.id).first)()
+
+    if action[2] == 'addbasket':
+        await call.answer(text='ok')        
+    elif action[2] == 'page':
+        page = int(action[3])
+        await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id ,False, user_filter.language)

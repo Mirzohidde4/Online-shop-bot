@@ -1,10 +1,11 @@
 from django.contrib import admin
-from .models import UserMod, CategoryMod, ProductMod
+from .models import UserMod, CategoryMod, ProductMod, BasketMod
 from unfold.admin import ModelAdmin
 from django.contrib.auth.models import Group, User
 
 
 admin.site.unregister(Group)
+admin.site.unregister(User)
 
 @admin.register(UserMod)
 class AdminUserMod(ModelAdmin):
@@ -23,3 +24,9 @@ class AdminCategoryMod(ModelAdmin):
 class AdminProductMod(ModelAdmin):
     list_display = ('name', 'price', 'category')
     list_filter = ('category', 'price')
+
+
+@admin.register(BasketMod)
+class AdminBasketMod(ModelAdmin):
+    list_display = ('user',)
+    list_filter = ('user',)
