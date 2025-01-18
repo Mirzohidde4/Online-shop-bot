@@ -8,7 +8,7 @@ from main.models import UserMod, CategoryMod, ProductMod, BasketMod
 from ..settings.states import UserState
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
-from ..settings.functions import get_user_language, send_products_by_category, get_main_button
+from ..settings.functions import *
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
@@ -111,7 +111,27 @@ async def pagination_callback(call: CallbackQuery):
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=call.from_user.id).first)()
 
     if action[2] == 'addbasket':
-        await call.answer(text='ok')        
+        try:
+            product = await sync_to_async(ProductMod.objects.get)(name=action[3], price=action[4])
+            basket = await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=1)
+            await call.message.answer(f"{product.name} savatchaga qo'shildi!")
+        
+        except ProductMod.DoesNotExist:
+            await call.message.answer("Mahsulot topilmadi. Iltimos, ma'lumotlarni tekshiring.")
+        except Exception as e:
+            await call.message.answer(f"Xatolik yuz berdi: {str(e)}")
+
     elif action[2] == 'page':
         page = int(action[3])
         await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id ,False, user_filter.language)
+
+
+@user_private_router.callback_query(F.data == 'get_basket') #! ...davomi
+async def get_basket(call: CallbackQuery):
+    user_id = call.from_user.id
+    lang = await get_user_language(user_id)
+
+    await call.message.delete()
+    await send_products_by_user(call.message.bot, user_id, 1, None, True, lang)
+    # await send_products_by_category(call.message.bot, user_id, None, 1, None, True, lang)
+    # await call.message.answer(text=lang['get_basket'])

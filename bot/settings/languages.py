@@ -16,7 +16,8 @@ languages = {
         'set_basket': '➕ Savatga qo\'shish',
         'order': '',
         'previous_pg': '⬅️ Oldingi',
-        'next_pg': 'Keyingi ➡️'
+        'next_pg': 'Keyingi ➡️',
+        'get_basket': 'Sizning savatingiz',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -36,6 +37,7 @@ languages = {
         'order': '',
         'previous_pg': '⬅️ Предыдущая',
         'next_pg': '➡️ Следующая',
+        'get_basket': 'Ваша корзина',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -55,5 +57,6 @@ languages = {
         'order': '',
         'previous_pg': '⬅️ Previous',
         'next_pg': '➡️ Next',
+        'get_basket': 'Your basket',
     }
 }

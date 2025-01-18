@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from main.models import UserMod, ProductMod, CategoryMod
+from main.models import UserMod, ProductMod, CategoryMod, BasketMod
 from ..settings.languages import languages
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
@@ -25,6 +25,12 @@ async def get_user_language(user_id: int) -> str:
 async def get_products_by_category(category_id):
     category_filter = await sync_to_async(CategoryMod.objects.filter(id=category_id).first)()
     products = await sync_to_async(list)(ProductMod.objects.filter(category_id=category_filter.id).all())
+    return products
+
+
+async def get_product_by_user(user_id):
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
+    products = await sync_to_async(list)(BasketMod.objects.filter(user=user_filter.user_id).all())
     return products
 
 
@@ -59,7 +65,7 @@ def create_pagination_keyboard(category_id, page, has_next, name, price, status,
 async def send_products_by_category(bot: Bot, chat_id, category_id, page, message_id=None, status=None, lang='uz'):
     products = await get_products_by_category(category_id)
     paginated_products = paginate_products(products, page)
-
+    
     if products is None or len(products) == 0:
         await bot.send_message(chat_id=chat_id, text=languages[lang]['none_category'])
         return None
@@ -72,7 +78,10 @@ async def send_products_by_category(bot: Bot, chat_id, category_id, page, messag
         elif lang == 'en':
             text = "".join(f"Name: {product.name}\nPrice: {product.price} som\n\n")
         
-        media = FSInputFile(path=product.photo.path)
+        if category_id:
+            media = FSInputFile(path=product.photo.path)
+        else:
+            media = FSInputFile(path=product.product.photo.path)
 
         has_next = len(products) > page * PAGE_SIZE
         keyboard = create_pagination_keyboard(category_id, page, has_next, product.name, product.price, status, lang=lang)
@@ -85,4 +94,14 @@ async def send_products_by_category(bot: Bot, chat_id, category_id, page, messag
         except TelegramBadRequest as e:
             if "Message is not modified" not in str(e): raise
 
-    
+
+async def send_products_by_user(bot: Bot, chat_id, page, message_id=None, status=None, lang='uz'):
+    products = await get_product_by_user(chat_id)
+    paginated_products = paginate_products(products, page)
+
+    if products is None or len(products) == 0:
+        await bot.send_message(chat_id=chat_id, text=languages[lang]['none_category'])
+        return None
+    print(products)
+    for product in paginated_products:
+        print(product)

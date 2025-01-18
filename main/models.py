@@ -44,13 +44,13 @@ class ProductMod(models.Model):
 
 class BasketMod(models.Model):
     user = models.PositiveBigIntegerField(verbose_name='foydalanuvchi id')
-    product_name = models.ForeignKey(to=ProductMod, on_delete=models.CASCADE, verbose_name='mahsulot')
-    category = models.CharField(verbose_name='turi', max_length=100)    
+    product = models.ForeignKey(to=ProductMod, on_delete=models.CASCADE, verbose_name='mahsulot')
+    category = models.PositiveIntegerField(verbose_name='turi')    
     count = models.PositiveIntegerField(verbose_name='soni', default=1)  
 
 
     def __str__(self):
-        return self.product_name 
+        return self.product.name
 
     class Meta: 
         verbose_name = 'Savat'
