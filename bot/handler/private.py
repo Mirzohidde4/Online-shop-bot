@@ -101,7 +101,7 @@ async def get_products(message: Message):
     if user_filter.language == 'en':
         category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
     
-    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language, status=False)
+    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language)
 
 
 @user_private_router.callback_query(lambda c: c.data.startswith("category_"))
@@ -113,7 +113,7 @@ async def pagination_callback(call: CallbackQuery):
     if action[2] == 'addbasket':
         try:
             product = await sync_to_async(ProductMod.objects.get)(name=action[3], price=action[4])
-            basket = await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=1)
+            await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=1)
             await call.message.answer(f"{product.name} savatchaga qo'shildi!")
         
         except ProductMod.DoesNotExist:
@@ -123,15 +123,13 @@ async def pagination_callback(call: CallbackQuery):
 
     elif action[2] == 'page':
         page = int(action[3])
-        await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id ,False, user_filter.language)
+        await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id, user_filter.language)
 
 
 @user_private_router.callback_query(F.data == 'get_basket') #! ...davomi
 async def get_basket(call: CallbackQuery):
     user_id = call.from_user.id
-    lang = await get_user_language(user_id)
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
 
     await call.message.delete()
-    await send_products_by_user(call.message.bot, user_id, 1, None, True, lang)
-    # await send_products_by_category(call.message.bot, user_id, None, 1, None, True, lang)
-    # await call.message.answer(text=lang['get_basket'])
+    await send_products_by_user(bot=call.message.bot, chat_id=user_id, page=1, lang=user_filter.language)

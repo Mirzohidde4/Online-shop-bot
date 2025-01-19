@@ -28,5 +28,5 @@ class AdminProductMod(ModelAdmin):
 
 @admin.register(BasketMod)
 class AdminBasketMod(ModelAdmin):
-    list_display = ('user',)
-    list_filter = ('user',)
+    list_display = ('user', 'product', 'category', 'count')
+    list_filter = ('user', 'category', 'product')
