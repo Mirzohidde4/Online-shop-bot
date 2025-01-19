@@ -126,7 +126,7 @@ async def pagination_callback(call: CallbackQuery):
         await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id, user_filter.language)
 
 
-@user_private_router.callback_query(F.data == 'get_basket') #! ...davomi
+@user_private_router.callback_query(F.data == 'get_basket')
 async def get_basket(call: CallbackQuery):
     user_id = call.from_user.id
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()

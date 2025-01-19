@@ -88,19 +88,16 @@ async def send_products_by_category(bot: Bot, chat_id, category_id, page, messag
         
         try:
             if message_id:
-                await bot.edit_message_media(media=InputMediaPhoto(media=media, caption=text), chat_id=chat_id, message_id=message_id, reply_markup=keyboard)
+                await bot.edit_message_media(media=InputMediaPhoto(media=media, caption=text), 
+                    chat_id=chat_id, message_id=message_id, reply_markup=keyboard)
             else:
                 await bot.send_photo(chat_id=chat_id, photo=media, caption=text, reply_markup=keyboard)
         except TelegramBadRequest as e:
             if "Message is not modified" not in str(e): raise
 
 
-async def get_product_by_user(user_id):
-    return await sync_to_async(list)(BasketMod.objects.filter(user=user_id).select_related('product'))
-
-
 async def send_products_by_user(bot: Bot, chat_id, page, message_id=None, lang='uz'):
-    products = await get_product_by_user(chat_id)
+    products = await sync_to_async(list)(BasketMod.objects.filter(user=chat_id).select_related('product'))
     paginated_products = paginate_products(products, page)
 
     if not products or len(products) == 0:
@@ -122,12 +119,8 @@ async def send_products_by_user(bot: Bot, chat_id, page, message_id=None, lang='
 
         try:
             if message_id:
-                await bot.edit_message_media(
-                    media=InputMediaPhoto(media=media, caption=text),
-                    chat_id=chat_id, 
-                    message_id=message_id,
-                    reply_markup=keyboard
-)
+                await bot.edit_message_media(media=InputMediaPhoto(media=media, caption=text),
+                    chat_id=chat_id, message_id=message_id, reply_markup=keyboard)
             else:
                 await bot.send_photo(chat_id=chat_id, photo=media, caption=text, reply_markup=keyboard)
         except TelegramBadRequest as e:
