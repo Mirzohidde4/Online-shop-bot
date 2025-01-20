@@ -125,6 +125,12 @@ async def pagination_callback(call: CallbackQuery):
         page = int(action[3])
         await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id, user_filter.language)
 
+    elif action[2] == 'back':
+        await call.message.delete()
+        lang = languages[user_filter.language]
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+
+
 
 @user_private_router.callback_query(F.data == 'get_basket')
 async def get_basket(call: CallbackQuery):
