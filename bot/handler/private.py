@@ -139,3 +139,14 @@ async def get_basket(call: CallbackQuery):
 
     await call.message.delete()
     await send_products_by_user(bot=call.message.bot, chat_id=user_id, page=1, lang=user_filter.language)
+
+
+@user_private_router.callback_query(F.data.startswith('basket_'))
+async def pagination_basket(call: CallbackQuery):
+    action = call.data.split("_")   
+    chat_id = int(action[1])
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=chat_id).first)()
+
+    if action[2] == 'page':
+        page = int(action[3])
+        await send_products_by_user(bot=call.message.bot, chat_id=chat_id, page=page, message_id=call.message.message_id, lang=user_filter.language) 
