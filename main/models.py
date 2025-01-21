@@ -6,6 +6,7 @@ class UserMod(models.Model):
     user_name = models.CharField(verbose_name='foydalanuvchi ismi', max_length=100, null=True, blank=True)
     full_name = models.CharField(verbose_name='to\'liq ismi', max_length=150)
     language = models.CharField(verbose_name='til', max_length=10)
+    phone = models.CharField(max_length=20, verbose_name='tel raqam')
 
     def __str__(self):
         return self.full_name

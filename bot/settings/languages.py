@@ -20,6 +20,9 @@ languages = {
         'get_basket': 'Sizning savatingiz',
         'quantity': 'ta',
         'ban_cnt': 'kamaytira olmaysiz',
+        'contact_text': '📲 Telefon raqamingizni yuboring',
+        'contact': '📞 Telefon raqamini yuborish',
+        'select_lang': '🇺🇿 Tilni tanlang',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -42,6 +45,9 @@ languages = {
         'get_basket': 'Ваша корзина',
         'quantity': 'шт',
         'ban_cnt': 'нельзя уменьшить',
+        'contact_text': '📲 Отправьте свой номер телефона',
+        'contact': '📞 Отправить номер телефона',
+        'select_lang': '🇷🇺 Выберите язык',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -64,5 +70,8 @@ languages = {
         'get_basket': 'Your basket',
         'quantity': 'pcs',
         'ban_cnt': 'cannot be reduced',
+        'contact_text': '📲 Send your phone number',
+        'contact': '📞 Send phone number',
+        'select_lang': '🇬🇧 Select a language',
     }
 }

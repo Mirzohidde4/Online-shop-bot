@@ -40,22 +40,22 @@ def create_pagination_keyboard(category_id, page, has_next, name, price, chat_id
     keyboard = InlineKeyboardBuilder()
 
     if category_id:
+        keyboard.row(
+            InlineKeyboardButton(text="➖", callback_data=f"cat_{category_id}_updt_mns_{page}_{soni}_{has_next}_{name}_{price}"),
+            InlineKeyboardButton(text=f"{soni} {language['quantity']}", callback_data="noop"),
+            InlineKeyboardButton(text="➕", callback_data=f"cat_{category_id}_updt_pls_{page}_{soni}_{has_next}_{name}_{price}")
+        )
         if int(page) > 1:
-            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"category_{category_id}_page_{int(page) - 1}")) 
+            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"cat_{category_id}_page_{int(page) - 1}")) 
         else:
             start = 1 
         if has_next:
-            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"category_{category_id}_page_{int(page) + 1}"))
+            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"cat_{category_id}_page_{int(page) + 1}"))
         else:
             end = 1
-        
-        keyboard.row(
-            InlineKeyboardButton(text="➖", callback_data=f"cat_{category_id}_updt_mns_{page}_{soni}_{has_next}_{name}_{price}"),
-            InlineKeyboardButton(text=f"{soni}", callback_data="noop"),
-            InlineKeyboardButton(text="➕", callback_data=f"cat_{category_id}_updt_pls_{page}_{soni}_{has_next}_{name}_{price}")
-        )
-        keyboard.add(InlineKeyboardButton(text=language['set_basket'], callback_data=f"cat_{category_id}_addbasket_{name}_{price}_{soni}"))
+        keyboard.add(InlineKeyboardButton(text=language['set_basket'], callback_data=f"cat_{category_id}_add_{name}_{price}_{soni}"))
         keyboard.add(InlineKeyboardButton(text=language['back'], callback_data=f"cat_{category_id}_back"))
+        keyboard.adjust(3, 2, 2) if (start == 1 and end == 1) or (start == 0 and end == 0) else keyboard.adjust(3, 1, 2)
    
     else:
         if int(page) > 1:
@@ -67,8 +67,8 @@ def create_pagination_keyboard(category_id, page, has_next, name, price, chat_id
         else:
             end = 1
         keyboard.add(InlineKeyboardButton(text=language['order'], callback_data=f"basket_{chat_id}_order_{name}_{price}"))
-
-    keyboard.adjust(2, 3, 2) if (start == 1 and end == 1) or (start == 0 and end == 0) else keyboard.adjust(1, 3, 2)
+        keyboard.add(InlineKeyboardButton(text=language['back'], callback_data=f"basket_{chat_id}_back"))
+        keyboard.adjust(1,)
     return keyboard.as_markup()
 
 

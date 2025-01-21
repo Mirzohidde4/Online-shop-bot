@@ -5,7 +5,7 @@ from aiogram.filters.command import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from asgiref.sync import sync_to_async
 from main.models import UserMod, CategoryMod, ProductMod, BasketMod
-from ..settings.states import UserState
+from ..settings.states import PhoneNumber
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
 from ..settings.functions import *
@@ -20,13 +20,43 @@ user_private_router = Router()
 async def command_start(message: Message):
     user_id = message.from_user.id
     full_name = message.from_user.full_name
-    username = message.from_user.username
     lang = await get_user_language(user_id)
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
     
-    if not user_filter: await sync_to_async(UserMod.objects.create)(user_id=user_id, user_name=username, full_name=full_name, language='uz')
-    await message.answer(text=lang['start'].replace('full_name', full_name), 
-        reply_markup=get_main_button(lang=lang))
+    if not user_filter:
+        txt = f"{languages['uz']['select_lang']}\n\n{languages['ru']['select_lang']}\n\n{languages['en']['select_lang']}"
+        await message.answer(text=txt, 
+            reply_markup=CreateInline({'🇺🇿 O\'zbek': 'language_uz', '🇷🇺 Русский': 'language_ru', '🇬🇧 English': 'language_en'}))
+    else:
+        await message.answer(text=lang['start'].replace('full_name', full_name), 
+            reply_markup=get_main_button(lang=lang))
+
+
+@user_private_router.callback_query(F.data.startswith('language_'))
+async def select_language(call: CallbackQuery, state: FSMContext):
+    action = call.data.split('_')[1]
+    if action in ['uz', 'ru', 'en']: await state.update_data({'language': action})
+    await call.message.delete()
+    await call.message.answer(text=languages[action]['contact_text'], reply_markup=Createreply(languages[action]['contact'], contact=True))
+    await state.set_state(PhoneNumber.number)
+
+
+@user_private_router.message(PhoneNumber.number)
+async def send_phone(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    full_name = message.from_user.full_name
+    username = message.from_user.username
+    data = await state.get_data()
+    language = data.get('language')
+    
+    if message.contact and message.contact.phone_number:
+        await sync_to_async(UserMod.objects.create)(user_id=user_id, user_name=username, 
+            full_name=full_name, language=language, phone=message.contact.phone_number)
+        await state.clear()
+        await message.answer(text=languages[language]['start'].replace('full_name', full_name), 
+            reply_markup=get_main_button(lang=languages[language]))
+    else: 
+        await message.answer(text=languages[language]['contact_text'], reply_markup=Createreply(languages[language]['contact'], contact=True))  
 
 
 @user_private_router.callback_query(F.data == 'get_products')
@@ -111,7 +141,7 @@ async def pagination_callback(call: CallbackQuery):
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=call.from_user.id).first)()
     lang = languages[user_filter.language]
     
-    if action[2] == 'addbasket':
+    if action[2] == 'add':
         try:
             count = int(action[5])
             print(count)
