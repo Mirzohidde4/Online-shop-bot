@@ -18,6 +18,8 @@ languages = {
         'previous_pg': '⬅️ Oldingi',
         'next_pg': 'Keyingi ➡️',
         'get_basket': 'Sizning savatingiz',
+        'quantity': 'ta',
+        'ban_cnt': 'kamaytira olmaysiz',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -38,6 +40,8 @@ languages = {
         'previous_pg': '⬅️ Предыдущая',
         'next_pg': '➡️ Следующая',
         'get_basket': 'Ваша корзина',
+        'quantity': 'шт',
+        'ban_cnt': 'нельзя уменьшить',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -58,5 +62,7 @@ languages = {
         'previous_pg': '⬅️ Previous',
         'next_pg': '➡️ Next',
         'get_basket': 'Your basket',
+        'quantity': 'pcs',
+        'ban_cnt': 'cannot be reduced',
     }
 }

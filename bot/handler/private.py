@@ -104,22 +104,48 @@ async def get_products(message: Message):
     await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language)
 
 
-@user_private_router.callback_query(lambda c: c.data.startswith("category_"))
+@user_private_router.callback_query(lambda c: c.data.startswith("cat_"))
 async def pagination_callback(call: CallbackQuery):
     action = call.data.split("_")
     category_id = int(action[1])
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=call.from_user.id).first)()
-
+    lang = languages[user_filter.language]
+    
     if action[2] == 'addbasket':
         try:
+            count = int(action[5])
+            print(count)
             product = await sync_to_async(ProductMod.objects.get)(name=action[3], price=action[4])
-            await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=1)
+            await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
             await call.message.answer(f"{product.name} savatchaga qo'shildi!")
         
         except ProductMod.DoesNotExist:
             await call.message.answer("Mahsulot topilmadi. Iltimos, ma'lumotlarni tekshiring.")
         except Exception as e:
             await call.message.answer(f"Xatolik yuz berdi: {str(e)}")
+
+    elif action[2] == "updt":
+        page = action[4]
+        has_next = action[6]
+        name = action[7]
+        price = action[8]
+        current_count = int(action[5])
+        
+        situation = False
+        if action[3] == "pls": 
+            current_count += 1
+            situation = True
+        elif action[3] == "mns":
+            if current_count > 1: 
+                current_count -= 1
+                situation = True
+            else: await call.answer(text=lang['ban_cnt'])
+        print(current_count)
+        keyboard = create_pagination_keyboard(
+            category_id=category_id, page=page, has_next=has_next, name=name, price=price, 
+            chat_id=call.from_user.id, soni=current_count, lang=user_filter.language)     
+        if situation:
+            await call.message.edit_reply_markup(reply_markup=keyboard)   
 
     elif action[2] == 'page':
         page = int(action[3])
@@ -129,7 +155,6 @@ async def pagination_callback(call: CallbackQuery):
         await call.message.delete()
         lang = languages[user_filter.language]
         await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
-
 
 
 @user_private_router.callback_query(F.data == 'get_basket')

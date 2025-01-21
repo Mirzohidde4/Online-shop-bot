@@ -29,40 +29,46 @@ async def get_products_by_category(category_id):
 
 
 def paginate_products(products, page):
-    start = (page - 1) * PAGE_SIZE
+    start = (int(page) - 1) * PAGE_SIZE
     end = start + PAGE_SIZE
     return products[start:end]
 
 
-def create_pagination_keyboard(category_id, page, has_next, name, price, chat_id, lang='uz'):
+def create_pagination_keyboard(category_id, page, has_next, name, price, chat_id, soni=1, lang='uz'):
     language = languages[lang]
     start, end = 0, 0
     keyboard = InlineKeyboardBuilder()
 
     if category_id:
-        if page > 1:
-            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"category_{category_id}_page_{page - 1}")) 
+        if int(page) > 1:
+            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"category_{category_id}_page_{int(page) - 1}")) 
         else:
             start = 1 
         if has_next:
-            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"category_{category_id}_page_{page + 1}"))
+            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"category_{category_id}_page_{int(page) + 1}"))
         else:
             end = 1
-        keyboard.add(InlineKeyboardButton(text=language['set_basket'], callback_data=f"category_{category_id}_addbasket_{name}_{price}"))
-        keyboard.add(InlineKeyboardButton(text=language['back'], callback_data=f"category_{category_id}_back"))
+        
+        keyboard.row(
+            InlineKeyboardButton(text="➖", callback_data=f"cat_{category_id}_updt_mns_{page}_{soni}_{has_next}_{name}_{price}"),
+            InlineKeyboardButton(text=f"{soni}", callback_data="noop"),
+            InlineKeyboardButton(text="➕", callback_data=f"cat_{category_id}_updt_pls_{page}_{soni}_{has_next}_{name}_{price}")
+        )
+        keyboard.add(InlineKeyboardButton(text=language['set_basket'], callback_data=f"cat_{category_id}_addbasket_{name}_{price}_{soni}"))
+        keyboard.add(InlineKeyboardButton(text=language['back'], callback_data=f"cat_{category_id}_back"))
    
     else:
-        if page > 1:
-            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"basket_{chat_id}_page_{page - 1}")) 
+        if int(page) > 1:
+            keyboard.add(InlineKeyboardButton(text=language['previous_pg'], callback_data=f"basket_{chat_id}_page_{int(page) - 1}")) 
         else:
             start = 1 
         if has_next:
-            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"basket_{chat_id}_page_{page + 1}"))
+            keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"basket_{chat_id}_page_{int(page) + 1}"))
         else:
             end = 1
         keyboard.add(InlineKeyboardButton(text=language['order'], callback_data=f"basket_{chat_id}_order_{name}_{price}"))
 
-    keyboard.adjust(2, 2) if (start == 1 and end == 1) or (start == 0 and end == 0) else keyboard.adjust(1, 2)
+    keyboard.adjust(2, 3, 2) if (start == 1 and end == 1) or (start == 0 and end == 0) else keyboard.adjust(1, 3, 2)
     return keyboard.as_markup()
 
 
@@ -84,7 +90,7 @@ async def send_products_by_category(bot: Bot, chat_id, category_id, page, messag
         
         media = FSInputFile(path=product.photo.path)
 
-        has_next = len(products) > page * PAGE_SIZE
+        has_next = len(products) > int(page) * PAGE_SIZE
         keyboard = create_pagination_keyboard(category_id, page, has_next, product.name, product.price, chat_id=chat_id, lang=lang)
         
         try:
