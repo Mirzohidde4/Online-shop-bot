@@ -23,6 +23,7 @@ languages = {
         'contact_text': '📲 Telefon raqamingizni yuboring',
         'contact': '📞 Telefon raqamini yuborish',
         'select_lang': '🇺🇿 Tilni tanlang',
+        'none_basket': 'Savatingiz bo\'sh',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -48,6 +49,7 @@ languages = {
         'contact_text': '📲 Отправьте свой номер телефона',
         'contact': '📞 Отправить номер телефона',
         'select_lang': '🇷🇺 Выберите язык',
+        'none_basket': 'Корзина пуста',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -73,5 +75,6 @@ languages = {
         'contact_text': '📲 Send your phone number',
         'contact': '📞 Send phone number',
         'select_lang': '🇬🇧 Select a language',
+        'none_basket': 'Basket is empty',
     }
 }
