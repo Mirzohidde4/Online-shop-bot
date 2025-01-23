@@ -144,21 +144,22 @@ async def pagination_callback(call: CallbackQuery):
     
     if action[2] == 'add':
         try:
-            count = int(action[5])
-            product = await sync_to_async(ProductMod.objects.get)(name=action[3], price=action[4])
+            count = int(action[4])
+            product = await sync_to_async(ProductMod.objects.get)(id=action[3])
             await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
-            await call.answer(f"{product.name} savatchaga qo'shildi!", show_alert=True)
+            await call.answer(f"{product.name} {lang['add_done']}", show_alert=True)
         
         except ProductMod.DoesNotExist:
-            await call.message.answer("Mahsulot topilmadi. Iltimos, ma'lumotlarni tekshiring.")
+            print("Mahsulot tugagan.")
         except Exception as e:
-            await call.message.answer(f"Xatolik yuz berdi: {str(e)}")
+            print(f"Xatolik yuz berdi: {str(e)}")
 
     elif action[2] == "updt":
         page = action[4]
         has_next = action[6]
         name = action[7]
         price = action[8]
+        product_id = action[9]
         current_count = int(action[5])
         
         situation = False
@@ -173,7 +174,7 @@ async def pagination_callback(call: CallbackQuery):
 
         keyboard = create_pagination_keyboard(
             category_id=category_id, page=page, has_next=has_next, name=name, price=price, 
-            chat_id=call.from_user.id, soni=current_count, lang=user_filter.language)     
+            chat_id=call.from_user.id, soni=current_count, lang=user_filter.language, product_id=product_id)     
         
         if situation: await call.message.edit_reply_markup(reply_markup=keyboard)   
 
