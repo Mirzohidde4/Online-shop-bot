@@ -200,7 +200,24 @@ async def pagination_basket(call: CallbackQuery):
     action = call.data.split("_")   
     chat_id = int(action[1])
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=chat_id).first)()
+    lang = languages[user_filter.language]
 
     if action[2] == 'page':
         page = int(action[3])
         await send_products_by_user(bot=call.message.bot, chat_id=chat_id, page=page, message_id=call.message.message_id, lang=user_filter.language, call=call) 
+
+    elif action[2] == 'back':
+        await call.message.delete()
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+
+    elif action[2] == 'delete':
+        product_id = int(action[3])
+        try:
+            await sync_to_async(BasketMod.objects.filter(user=chat_id, product=product_id).delete)()
+            if action[4] == 'True':
+                await call.answer(text="ochirildi")
+                await call.message.delete()
+                await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+        except Exception as error:
+            print('o\'chirishda xatolik:', error)    
+    
