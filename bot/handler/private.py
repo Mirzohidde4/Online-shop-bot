@@ -147,7 +147,7 @@ async def pagination_callback(call: CallbackQuery):
             count = int(action[4])
             product = await sync_to_async(ProductMod.objects.get)(id=action[3])
             await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
-            await call.answer(f"{product.name} {lang['add_done']}", show_alert=True)
+            await call.answer(lang['add_done'].replace('name', product.name), show_alert=True)
         
         except ProductMod.DoesNotExist:
             print("Mahsulot tugagan.")
@@ -214,10 +214,15 @@ async def pagination_basket(call: CallbackQuery):
         product_id = int(action[3])
         try:
             await sync_to_async(BasketMod.objects.filter(user=chat_id, product=product_id).delete)()
+            await call.answer(text=lang['delete_done'])
+            
             if action[4] == 'True':
-                await call.answer(text="ochirildi")
                 await call.message.delete()
                 await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+            elif action[4] == 'False':
+                await send_products_by_user(bot=call.message.bot, chat_id=chat_id, page=1, lang=user_filter.language, call=call) 
         except Exception as error:
             print('o\'chirishda xatolik:', error)    
+
+    elif action[2] == 'order': pass        #! davomi..
     

@@ -61,7 +61,8 @@ def create_pagination_keyboard(category_id, page, has_next, name, price, chat_id
         else: start = 1 
         if has_next:
             keyboard.add(InlineKeyboardButton(text=language['next_pg'], callback_data=f"basket_{chat_id}_page_{int(page) + 1}"))
-        else: end = 1
+        else: 
+            end = 1
         piece = True if (start == 1 and end == 1) else False
         
         keyboard.add(InlineKeyboardButton(text=language['order'], callback_data=f"basket_{chat_id}_order_{product_id}_{piece}"))

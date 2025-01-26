@@ -25,7 +25,8 @@ languages = {
         'select_lang': '🇺🇿 Tilni tanlang',
         'none_basket': 'Savatingiz bo\'sh',
         'delete': '🗑 Savatdan o\'chirish',
-        'add_done': 'Savatchaga qo\'shildi!',
+        'add_done': '✅ name savatchaga qo\'shildi!',
+        'delete_done': '✔️ Savatdan o\'chirildi!',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -53,7 +54,8 @@ languages = {
         'select_lang': '🇷🇺 Выберите язык',
         'none_basket': 'Корзина пуста',
         'delete': '🗑 Удалить из корзины',
-        'add_done': 'Добавлено в корзину!',
+        'add_done': "✅ name добавлено в корзину!",
+        'delete_done': '✔️ Удалено из корзины!',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -81,6 +83,7 @@ languages = {
         'select_lang': '🇬🇧 Select a language',
         'none_basket': 'Basket is empty',
         'delete': '🗑 Remove from basket',
-        'add_done': 'Added to basket!',
+        'add_done': "✅ name added to basket!",
+        'delete_done': '✔️ Removed from basket!',
     }
 }
