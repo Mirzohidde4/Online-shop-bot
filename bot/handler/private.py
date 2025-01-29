@@ -146,7 +146,13 @@ async def pagination_callback(call: CallbackQuery):
         try:
             count = int(action[4])
             product = await sync_to_async(ProductMod.objects.get)(id=action[3])
-            await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
+            product_filter = await sync_to_async(BasketMod.objects.filter(user=call.from_user.id, product=product.pk, category=category_id).first)()
+            if product_filter:
+                old_count = product_filter.count
+                new_count = int(old_count) + int(count)
+                await sync_to_async(BasketMod.objects.filter(user=call.from_user.id, product=product.pk, category=category_id).update)(count=new_count)
+            else:  
+                await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
             await call.answer(lang['add_done'].replace('name', product.name), show_alert=True)
         
         except ProductMod.DoesNotExist:
@@ -224,5 +230,12 @@ async def pagination_basket(call: CallbackQuery):
         except Exception as error:
             print('o\'chirishda xatolik:', error)    
 
-    elif action[2] == 'order': pass        #! davomi..
+    elif action[2] == 'order':
+        await call.message.delete()
+        if action[4] == 'True':
+            print('one')
+            await call.message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))
+        elif action[4] == 'False':
+            # await call.message.answer(text)
+            print('many')    
     

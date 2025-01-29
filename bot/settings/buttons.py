@@ -14,10 +14,12 @@ def CreateInline(*button_rows, just=(1,)) -> InlineKeyboardMarkup: #! {a: a, b: 
     return builder.as_markup()
 
 
-def Createreply(*args, contact=False, just=(2,)) -> ReplyKeyboardMarkup: #! 'a', 'b', ..
+def Createreply(*args, contact=False, location=False, just=(2,)) -> ReplyKeyboardMarkup: #! 'a', 'b', ..
     builder = ReplyKeyboardBuilder()
     for i in args:
-        builder.add(KeyboardButton(text=i, request_contact=True if contact else False))
+        if contact: builder.add(KeyboardButton(text=i, request_contact=True))
+        elif location: builder.add(KeyboardButton(text=i, request_location=True))
+        else: builder.add(KeyboardButton(text=i))
     builder.adjust(*just)
     return builder.as_markup(resize_keyboard=True, one_time_keyboard=True)
         

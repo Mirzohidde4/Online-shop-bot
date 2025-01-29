@@ -27,6 +27,8 @@ languages = {
         'delete': '🗑 Savatdan o\'chirish',
         'add_done': '✅ name savatchaga qo\'shildi!',
         'delete_done': '✔️ Savatdan o\'chirildi!',
+        'location_txt': '📍 Joylashuvingizni yuboring',
+        'get_location': '📍 Joylashuvni yuborish',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -56,6 +58,8 @@ languages = {
         'delete': '🗑 Удалить из корзины',
         'add_done': "✅ name добавлено в корзину!",
         'delete_done': '✔️ Удалено из корзины!',
+        'location_txt': '📍 Отправьте свое местоположение',
+        'get_location': '📍 Отправить местоположение',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -85,5 +89,7 @@ languages = {
         'delete': '🗑 Remove from basket',
         'add_done': "✅ name added to basket!",
         'delete_done': '✔️ Removed from basket!',
+        'location_txt': '📍 Send your location',
+        'get_location': '📍 Send location',
     }
 }
