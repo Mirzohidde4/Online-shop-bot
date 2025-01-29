@@ -150,7 +150,10 @@ async def pagination_callback(call: CallbackQuery):
             if product_filter:
                 old_count = product_filter.count
                 new_count = int(old_count) + int(count)
-                await sync_to_async(BasketMod.objects.filter(user=call.from_user.id, product=product.pk, category=category_id).update)(count=new_count)
+                try:
+                    await sync_to_async(BasketMod.objects.filter(user=call.from_user.id, product=product.pk, category=category_id).update)(count=new_count)
+                except Exception as error:
+                    print(f"mahsulot yangilashda xatolik: {str(error)}")    
             else:  
                 await sync_to_async(BasketMod.objects.create)(user=call.from_user.id, product=product, category=category_id, count=count)
             await call.answer(lang['add_done'].replace('name', product.name), show_alert=True)
@@ -238,4 +241,3 @@ async def pagination_basket(call: CallbackQuery):
         elif action[4] == 'False':
             # await call.message.answer(text)
             print('many')    
-    
