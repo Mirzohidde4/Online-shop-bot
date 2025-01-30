@@ -55,3 +55,16 @@ class BasketMod(models.Model):
     class Meta: 
         verbose_name = 'Savat'
         verbose_name_plural = 'Savatlar'    
+
+
+class AdminMod(models.Model):
+    name = models.CharField(verbose_name='ism', max_length=50)
+    telegram_id = models.PositiveBigIntegerField(verbose_name='telegram id')
+    phone = models.DecimalField(verbose_name='tel raqam', max_digits=15, decimal_places=0)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Admin'
+        verbose_name_plural = 'Admin'

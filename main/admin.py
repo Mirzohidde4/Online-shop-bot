@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserMod, CategoryMod, ProductMod, BasketMod
+from .models import UserMod, CategoryMod, ProductMod, BasketMod, AdminMod
 from unfold.admin import ModelAdmin
 from django.contrib.auth.models import Group, User
 
@@ -11,6 +11,7 @@ admin.site.unregister(User)
 class AdminUserMod(ModelAdmin):
     list_display = ('full_name', 'language')
     list_filter = ('language',)
+    search_fields = ('full_name',)
 
 
 @admin.register(CategoryMod)
@@ -24,9 +25,23 @@ class AdminCategoryMod(ModelAdmin):
 class AdminProductMod(ModelAdmin):
     list_display = ('name', 'price', 'category')
     list_filter = ('category', 'price')
+    search_fields = ('name',)
 
 
 @admin.register(BasketMod)
 class AdminBasketMod(ModelAdmin):
     list_display = ('user', 'product', 'category', 'count')
     list_filter = ('user', 'category', 'product')
+    search_fields = ('user',)
+
+
+@admin.register(AdminMod)
+class AdminAdminMod(ModelAdmin):
+    list_display = ('name', 'telegram_id', 'phone')
+    search_fields = ('name', 'phone')
+
+    def has_add_permission(self, request):
+        if AdminMod.objects.count() >= 1:
+            return False
+        else:
+            return True 

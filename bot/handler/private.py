@@ -205,7 +205,7 @@ async def get_basket(call: CallbackQuery):
 
 
 @user_private_router.callback_query(F.data.startswith('basket_'))
-async def pagination_basket(call: CallbackQuery):
+async def pagination_basket(call: CallbackQuery, state: FSMContext):
     action = call.data.split("_")   
     chat_id = int(action[1])
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=chat_id).first)()
@@ -236,8 +236,18 @@ async def pagination_basket(call: CallbackQuery):
     elif action[2] == 'order':
         await call.message.delete()
         if action[4] == 'True':
-            print('one')
+            await state.update_data({'chat_id': chat_id, 'product_id': int(action[3])})
             await call.message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))
+            await state.set_state(PhoneNumber.location)
         elif action[4] == 'False':
             # await call.message.answer(text)
             print('many')    
+
+
+@user_private_router.message(PhoneNumber.location)
+async def get_location(message: Message, state: FSMContext):
+    data = await state.get_data()
+    chat_id = data['chat_id']
+    product_id = data.get('product_id')
+    if message.location:
+        pass
