@@ -1,6 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-class PhoneNumber(StatesGroup):
+class User(StatesGroup):
     number = State()
+    category = State()
     location = State()

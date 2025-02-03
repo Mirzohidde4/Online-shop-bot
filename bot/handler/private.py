@@ -5,15 +5,17 @@ from aiogram.filters.command import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from asgiref.sync import sync_to_async
 from main.models import UserMod, CategoryMod, ProductMod, BasketMod
-from ..settings.states import PhoneNumber
+from ..settings.states import User
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
 from ..settings.functions import *
+from geopy.geocoders import Nominatim
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 user_private_router = Router()
+geolocator = Nominatim(user_agent="geo_bot")
 
 
 @user_private_router.message(CommandStart())
@@ -22,7 +24,6 @@ async def command_start(message: Message):
     full_name = message.from_user.full_name
     lang = await get_user_language(user_id)
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
-    
     if not user_filter:
         txt = f"{languages['uz']['select_lang']}\n\n{languages['ru']['select_lang']}\n\n{languages['en']['select_lang']}"
         await message.answer(text=txt, 
@@ -38,10 +39,10 @@ async def select_language(call: CallbackQuery, state: FSMContext):
     if action in ['uz', 'ru', 'en']: await state.update_data({'language': action})
     await call.message.delete()
     await call.message.answer(text=languages[action]['contact_text'], reply_markup=Createreply(languages[action]['contact'], contact=True))
-    await state.set_state(PhoneNumber.number)
+    await state.set_state(User.number)
 
 
-@user_private_router.message(PhoneNumber.number)
+@user_private_router.message(User.number)
 async def send_phone(message: Message, state: FSMContext):
     user_id = message.from_user.id
     full_name = message.from_user.full_name
@@ -60,7 +61,7 @@ async def send_phone(message: Message, state: FSMContext):
 
 
 @user_private_router.callback_query(F.data == 'get_products')
-async def get_categorys(call: CallbackQuery):
+async def get_categorys(call: CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
     category_filter = await sync_to_async(list)(CategoryMod.objects.all())
@@ -75,6 +76,7 @@ async def get_categorys(call: CallbackQuery):
     
     await call.message.delete()
     await call.message.answer(text=lang['category_txt'], reply_markup=markup)
+    await state.set_state(User.category)
 
 
 @user_private_router.callback_query(F.data == 'set_language')
@@ -112,18 +114,15 @@ async def change_language(call: CallbackQuery):
         await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
 
 
-@user_private_router.message(lambda message: message.text in ['🔙 Back', '🔙 Назад', '🔙 Orqaga'])
-async def get_back(message: Message):
-    user_id = message.from_user.id
-    lang = await get_user_language(user_id)
-    await message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
-
-
-@user_private_router.message(F.text)
-async def get_products(message: Message):
+@user_private_router.message(User.category)
+async def get_products(message: Message, state: FSMContext):
     category = message.text
     user_id = message.from_user.id
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
+    lang = languages[user_filter.language]
+
+    if message.text in ['🔙 Back', '🔙 Назад', '🔙 Orqaga']:
+        await message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
 
     if user_filter.language == 'uz':
         category_filter = await sync_to_async(CategoryMod.objects.filter(name_uz=category).first)()
@@ -133,6 +132,7 @@ async def get_products(message: Message):
         category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
     
     await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language)
+    await state.clear()
 
 
 @user_private_router.callback_query(lambda c: c.data.startswith("cat_"))
@@ -236,18 +236,44 @@ async def pagination_basket(call: CallbackQuery, state: FSMContext):
     elif action[2] == 'order':
         await call.message.delete()
         if action[4] == 'True':
-            await state.update_data({'chat_id': chat_id, 'product_id': int(action[3])})
+            await state.update_data({'chat_id': chat_id, 'product_id': int(action[3]), 'type': 'less'})
             await call.message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))
-            await state.set_state(PhoneNumber.location)
+            await state.set_state(User.location)
         elif action[4] == 'False':
             # await call.message.answer(text)
             print('many')    
 
 
-@user_private_router.message(PhoneNumber.location)
+@user_private_router.message(User.location)
 async def get_location(message: Message, state: FSMContext):
     data = await state.get_data()
     chat_id = data['chat_id']
     product_id = data.get('product_id')
+    order_type = data.get('type')
+    admin = await get_admin()
+    user_filter = await sync_to_async(UserMod.objects.filter(user_id=chat_id).first)()
+    lang = languages[user_filter.language]  
+    product = await sync_to_async(ProductMod.objects.get)(id=product_id)
+    if order_type == 'less': basket = await sync_to_async(BasketMod.objects.filter(user=chat_id, product=product_id).first)()
+
     if message.location:
-        pass
+        location = geolocator.reverse((message.location.latitude, message.location.longitude), language=user_filter.language)
+
+        if location and location.raw.get("address"):
+            address = location.raw["address"]
+            city = address.get("city") or address.get("town") or address.get("village") or "Noma'lum"
+            region = address.get("state", None)
+            result = f"{city}, {region if region else ''}"
+        else: result = None
+        #! til adminniki bolishi kerak
+        text = f"Nomi: {product.name}\nNarxi: {product.price} so'm\nMiqdori: {basket.count}" if user_filter.language == 'uz' else \
+               f"Название: {product.name}\nЦена: {product.price} сум\nКоличество: {basket.count}" if user_filter.language == 'ru' else \
+               f"Name: {product.name}\nPrice: {product.price} som\nCount: {basket.count}"
+        
+        try: 
+            location = await message.bot.send_venue(chat_id=admin.telegram_id, latitude=message.location.latitude, 
+                longitude=message.location.longitude, title=lang['new_order'], address=result if result else "")
+            await message.bot.send_message(chat_id=admin.telegram_id, text=text, reply_to_message_id=location.message_id) 
+        except Exception as error:
+            print('Xatolik:', error)    
+    else: await message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))        

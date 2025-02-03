@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from main.models import UserMod, ProductMod, CategoryMod, BasketMod
+from main.models import UserMod, ProductMod, CategoryMod, BasketMod, AdminMod
 from ..settings.languages import languages
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
@@ -7,6 +7,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.exceptions import TelegramBadRequest
 from config.settings import PAGE_SIZE
 from bot.settings.buttons import CreateInline
+
+
+async def get_admin():
+    admin_filter = await sync_to_async(list)(AdminMod.objects.all())
+    return admin_filter[0] if admin_filter else None
 
 
 def get_main_button(lang):
