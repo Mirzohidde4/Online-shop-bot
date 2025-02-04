@@ -265,14 +265,15 @@ async def get_location(message: Message, state: FSMContext):
             region = address.get("state", None)
             result = f"{city}, {region if region else ''}"
         else: result = None
-        #! til adminniki bolishi kerak
-        text = f"Nomi: {product.name}\nNarxi: {product.price} so'm\nMiqdori: {basket.count}" if user_filter.language == 'uz' else \
-               f"Название: {product.name}\nЦена: {product.price} сум\nКоличество: {basket.count}" if user_filter.language == 'ru' else \
-               f"Name: {product.name}\nPrice: {product.price} som\nCount: {basket.count}"
+
+        user = f"@{user_filter.user_name}" if user_filter.user_name else f"<a href='{message.from_user.url}'>{user_filter.full_name}</a>"
+        text = f"<b>Nomi:</b> {product.name}\n<b>Narxi:</b> {product.price} so'm\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+               f"<b>Название:</b> {product.name}\n<b>Цена:</b> {product.price} сум\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+               f"<b>Name:</b> {product.name}\n<b>Price:</b> {product.price} som\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
         
         try: 
             location = await message.bot.send_venue(chat_id=admin.telegram_id, latitude=message.location.latitude, 
-                longitude=message.location.longitude, title=lang['new_order'], address=result if result else "")
+                longitude=message.location.longitude, title=languages[admin.language]['new_order'], address=result if result else "")
             await message.bot.send_message(chat_id=admin.telegram_id, text=text, reply_to_message_id=location.message_id) 
         except Exception as error:
             print('Xatolik:', error)    

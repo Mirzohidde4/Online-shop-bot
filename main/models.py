@@ -58,9 +58,11 @@ class BasketMod(models.Model):
 
 
 class AdminMod(models.Model):
+    CHOICES = [('uz', 'uz'), ('ru', 'ru'), ('en', 'en')]
     name = models.CharField(verbose_name='ism', max_length=50)
     telegram_id = models.PositiveBigIntegerField(verbose_name='telegram id')
     phone = models.DecimalField(verbose_name='tel raqam', max_digits=15, decimal_places=0)
+    language = models.CharField(max_length=5, choices=CHOICES, default='uz')
 
     def __str__(self):
         return self.name
