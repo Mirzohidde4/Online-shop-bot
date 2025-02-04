@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-zyw-x5*8z_fmwquzdau-=4et$_5leyw=-lyf&$xqm@evmrlyuq'
-BOT_TOKEN = '7371123065:AAH8M92Di0RrezFd4cKB4XcR4sy9DenOXVM'
+BOT_TOKEN = '7371123065:AAGnI-_99lC-fLs2w2hL2iqBHc_kCzCHXro'
 ADMIN_ID = '795303467'
 PAGE_SIZE = 1  #! paginatsiya uchun 
 

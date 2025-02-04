@@ -30,6 +30,12 @@ languages = {
         'location_txt': '📍 Joylashuvingizni yuboring',
         'get_location': '📍 Joylashuvni yuborish',
         'new_order': 'Yangi buyurtma',
+        'yes': '✅ Tasdiqlash',
+        'no': '❌ Bekor qilish',
+        'order_info': '🔘 Barchasini buyurtma qilasizmi yoki faqat shuni?',
+        'order_done': '✔️ Buyurtmangiz yuborildi!',
+        'one': 'faqat shuni',
+        'all': 'barchasi',
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -62,6 +68,12 @@ languages = {
         'location_txt': '📍 Отправьте свое местоположение',
         'get_location': '📍 Отправить местоположение',
         'new_order': 'Новый заказ',
+        'yes': '✅ Подтвердить',
+        'no': '❌ Отказаться',
+        'order_info': '🔘 Заказать все или только это ?',
+        'order_done': '✔️ Ваш заказ отправлен!',
+        'one': 'только это',
+        'all': 'все',
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -94,5 +106,11 @@ languages = {
         'location_txt': '📍 Send your location',
         'get_location': '📍 Send location',
         'new_order': 'New order',
+        'yes': '✅ Confirm',
+        'no': '❌ Decline',
+        'order_info': '🔘 Order all or just this one ?',
+        'order_done': '✔️ Your order has been sent!',
+        'one': 'this one',
+        'all': 'all',
     }
 }

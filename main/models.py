@@ -49,9 +49,6 @@ class BasketMod(models.Model):
     category = models.PositiveIntegerField(verbose_name='kategoriya id')    
     count = models.PositiveIntegerField(verbose_name='soni', default=1)  
 
-    def __str__(self):
-        return self.product.name if self.product_id else "None"
-
     class Meta: 
         verbose_name = 'Savat'
         verbose_name_plural = 'Savatlar'    
