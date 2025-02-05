@@ -89,7 +89,7 @@ async def send_products_by_category(bot: Bot, chat_id, category_id, page, messag
     for product in paginated_products:
         text = f"Nomi: {product.name}\nNarxi: {product.price} so'm\n\n" if lang == 'uz' else \
                f"Название: {product.name}\nЦена: {product.price} сум\n\n" if lang == 'ru' else \
-               f"Name: {product.name}\nPrice: {product.price} som\n\n"
+               f"Name: {product.name}\nPrice: {product.price} sum\n\n"
         media = FSInputFile(path=product.photo.path)
 
         has_next = len(products) > int(page) * PAGE_SIZE

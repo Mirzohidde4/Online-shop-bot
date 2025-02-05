@@ -264,9 +264,10 @@ async def get_location(message: Message, state: FSMContext):
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
     user = f"@{user_filter.user_name}" if user_filter.user_name else f"<a href='{message.from_user.url}'>{user_filter.full_name}</a>"
     lang = languages[user_filter.language]  
+    text_to_user = lang['order_request']
     
     if message.location:
-        location = geolocator.reverse((message.location.latitude, message.location.longitude), language=user_filter.language)
+        location = geolocator.reverse((message.location.latitude, message.location.longitude), language=admin.language)
         if location and location.raw.get("address"):
             address = location.raw["address"]
             city = address.get("city") or address.get("town") or address.get("village") or "Noma'lum"
@@ -278,41 +279,43 @@ async def get_location(message: Message, state: FSMContext):
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.get, thread_sensitive=True)(user=user_id, product=product_id)
 
-            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n\n\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Price:</b> {int(product.price) * int(basket.count)} som\n\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
-            
+            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {int(product.price) * int(basket.count)} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+
         elif order_type == 'one':   
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first)()
 
-            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n\n\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n<b>Price:</b> {int(product.price) * int(basket.count)} som\n\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {int(product.price) * int(basket.count)} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+            
         
-        elif order_type == 'all': #! ishlamadi 
-            basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(product=product_id, user=user_id).all())
+        elif order_type == 'all':
+            basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
 
             products = f"<b>Mahsulotlar:</b>" if admin.language == 'uz' else \
-                    f"<b>Продукты:</b>" if admin.language == 'en' else \
+                    f"<b>Продукты:</b>" if admin.language == 'ru' else \
                     f"<b>Products:</b>" 
             prices = 0
-            
+        
             for item in basket:
-                print(item)
-                product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=item.product)
-                products += f"<b>{product.name}</b>({item.count}), "
+                product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=item.product_id)
+                products += f" <b>{product.name}</b>({item.count}),"
                 prices += int(product.price) * int(item.count)
             
-            text = f"{products}\n{prices}\n\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"{products}\n{prices}\n\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"{products}\n{prices}\n\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
-       
+            text = f"{products}\n\n<b>Narxi:</b> {prices} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"{products}\n\n<b>Цена:</b> {prices} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"{products}\n\n<b>Price:</b> {prices} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+
         try: 
             location = await message.bot.send_venue(chat_id=admin.telegram_id, latitude=message.location.latitude, 
                 longitude=message.location.longitude, title=languages[admin.language]['new_order'], address=result if result else "")
             await message.bot.send_message(chat_id=admin.telegram_id, text=text, reply_to_message_id=location.message_id, 
                 reply_markup=CreateInline({languages[admin.language]['yes']: f"order_yes_{product_id}", languages[admin.language]['no']: f"order_no_{product_id}"}, just=(2,))) 
+            message_to_user = await message.bot.send_message(chat_id=user_id, text=text_to_user, reply_markup=ReplyKeyboardRemove())
+        
         except Exception as error:
             print('Xatolik:', error) 
         await state.clear()    

@@ -33,7 +33,7 @@ class ProductMod(models.Model):
     category = models.ForeignKey(CategoryMod, verbose_name='turi', on_delete=models.CASCADE)
     name = models.CharField(verbose_name='nomi', max_length=100)
     price = models.PositiveIntegerField(verbose_name='narxi')
-    photo = models.ImageField(verbose_name='rasmi', upload_to='media/products/', null=True, blank=True)
+    photo = models.ImageField(verbose_name='rasmi', upload_to='media/products/')
 
     def __str__(self):
         return self.name
@@ -48,6 +48,7 @@ class BasketMod(models.Model):
     product = models.ForeignKey(to=ProductMod, on_delete=models.CASCADE, verbose_name='mahsulot')
     category = models.PositiveIntegerField(verbose_name='kategoriya id')    
     count = models.PositiveIntegerField(verbose_name='soni', default=1)  
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='sana', null=True, blank=True)
 
     class Meta: 
         verbose_name = 'Savat'

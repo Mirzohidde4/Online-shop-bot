@@ -36,6 +36,8 @@ languages = {
         'order_done': '✔️ Buyurtmangiz yuborildi!',
         'one': 'faqat shuni',
         'all': 'barchasi',
+        'order_all': 'Siz savatingizdagi barcha mahsulotlarga buyurtma berdingiz',
+        'order_request': f"Sizning buyurtmangiz ko'rib chiqilmoqda...",
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -74,6 +76,8 @@ languages = {
         'order_done': '✔️ Ваш заказ отправлен!',
         'one': 'только это',
         'all': 'все',
+        'order_all': 'Вы заказали все продукты из корзины',
+        'order_request': f"Ваш заказ обрабатывается...",
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -112,5 +116,7 @@ languages = {
         'order_done': '✔️ Your order has been sent!',
         'one': 'this one',
         'all': 'all',
+        'order_all': 'You ordered all products from the basket',
+        'order_request': f"Your order is being processed...",
     }
 }

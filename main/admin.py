@@ -30,7 +30,7 @@ class AdminProductMod(ModelAdmin):
 
 @admin.register(BasketMod)
 class AdminBasketMod(ModelAdmin):
-    list_display = ('user', 'product', 'category', 'count')
+    list_display = ('user', 'product', 'category', 'count', 'created_at')
     list_filter = ('user', 'category', 'product')
     search_fields = ('user',)
 
