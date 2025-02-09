@@ -310,14 +310,40 @@ async def get_location(message: Message, state: FSMContext):
                 f"{products}\n\n<b>Price:</b> {prices} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
 
         try: 
+            message_to_user = await message.bot.send_message(chat_id=user_id, text=text_to_user, reply_markup=ReplyKeyboardRemove())
+            
             location = await message.bot.send_venue(chat_id=admin.telegram_id, latitude=message.location.latitude, 
                 longitude=message.location.longitude, title=languages[admin.language]['new_order'], address=result if result else "")
             await message.bot.send_message(chat_id=admin.telegram_id, text=text, reply_to_message_id=location.message_id, 
-                reply_markup=CreateInline({languages[admin.language]['yes']: f"order_yes_{product_id}", languages[admin.language]['no']: f"order_no_{product_id}"}, just=(2,))) 
-            message_to_user = await message.bot.send_message(chat_id=user_id, text=text_to_user, reply_markup=ReplyKeyboardRemove())
+                reply_markup=CreateInline({languages[admin.language]['yes']: f"order_yes_{order_type}_{user_id}_{product_id}_{message_to_user.message_id}_{location.message_id}", languages[admin.language]['no']: f"order_no_{order_type}_{user_id}_{product_id}_{message_to_user.message_id}_{location.message_id}"}, just=(2,))) 
         
         except Exception as error:
             print('Xatolik:', error) 
         await state.clear()    
     
-    else: await message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))        
+    else: await message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))    
+
+
+@user_private_router.callback_query(F.data.startswith('order_'))
+async def orders_callback(call: CallbackQuery, state: FSMContext):
+    action = call.data.split("_")[1]
+    order_type = call.data.split("_")[2]
+    user_id = call.data.split("_")[3]
+    product_id = call.data.split("_")[4]
+    message_id = call.data.split("_")[5]
+    location_id = call.data.split("_")[6]
+    lang = await get_user_language(user_id=user_id)
+    
+    await call.message.bot.delete_message(chat_id=user_id, message_id=int(location_id))
+    await call.answer(text='bajarildi')
+    await call.message.delete()
+
+    await call.message.bot.delete_message(chat_id=user_id, message_id=int(message_id))
+    if action == 'yes':
+        await call.message.answer(text=lang['order_yes'])
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+
+    elif action == 'no':
+        await call.message.answer(text=lang['order_no'])
+        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+    
