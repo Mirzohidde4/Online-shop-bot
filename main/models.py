@@ -59,8 +59,8 @@ class AdminMod(models.Model):
     CHOICES = [('uz', 'uz'), ('ru', 'ru'), ('en', 'en')]
     name = models.CharField(verbose_name='ism', max_length=50)
     telegram_id = models.PositiveBigIntegerField(verbose_name='telegram id')
-    phone = models.DecimalField(verbose_name='tel raqam', max_digits=15, decimal_places=0)
-    language = models.CharField(max_length=5, choices=CHOICES, default='uz')
+    phone = models.DecimalField(verbose_name='telefon raqam', max_digits=15, decimal_places=0)
+    language = models.CharField(max_length=5, choices=CHOICES, default='uz', verbose_name='til')
 
     def __str__(self):
         return self.name
@@ -68,3 +68,16 @@ class AdminMod(models.Model):
     class Meta:
         verbose_name = 'Admin'
         verbose_name_plural = 'Admin'
+
+
+class OrderMod(models.Model):
+    user = models.ForeignKey(to=UserMod, on_delete=models.CASCADE, verbose_name='foydalanuvchi') 
+    product_name = models.CharField(verbose_name='mahsulot nomi', max_length=100)
+    product_price = models.PositiveIntegerField(verbose_name='mahsulot narxi')
+    product_count = models.PositiveIntegerField(verbose_name='mahsulot soni')   
+    overal_price = models.PositiveBigIntegerField(verbose_name='umumiy narxi') 
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='sana', null=True, blank=True)
+    
+    class Meta:
+        verbose_name = 'Buyurtma'
+        verbose_name_plural = 'Buyurtmalar'

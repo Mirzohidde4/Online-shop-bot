@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserMod, CategoryMod, ProductMod, BasketMod, AdminMod
+from .models import *
 from unfold.admin import ModelAdmin
 from django.contrib.auth.models import Group, User
 
@@ -45,3 +45,8 @@ class AdminAdminMod(ModelAdmin):
             return False
         else:
             return True 
+        
+
+@admin.register(OrderMod)
+class AdminOrder(ModelAdmin):
+    list_display = ('user', 'product_name', 'created_at')

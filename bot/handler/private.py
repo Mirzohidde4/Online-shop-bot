@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.command import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from asgiref.sync import sync_to_async
-from main.models import UserMod, CategoryMod, ProductMod, BasketMod
+from main.models import UserMod, CategoryMod, ProductMod, BasketMod, OrderMod
 from ..settings.states import User
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
@@ -285,7 +285,7 @@ async def get_location(message: Message, state: FSMContext):
 
         elif order_type == 'one':   
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
-            basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first)()
+            basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first, thread_sensitive=True)()
 
             text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
                 f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
@@ -340,6 +340,22 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
 
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(message_id))
     if action == 'yes':
+        if order_type in ['less', 'one']:
+            try:
+                basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first, thread_sensitive=True)()
+                if basket:
+                    user = await sync_to_async(UserMod.objects.get, thread_sensitive=True)(user_id=user_id)
+                    product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
+                
+                    overal = int(basket.count) * int(product.price)
+                    await sync_to_async(OrderMod.objects.create)(user=user, product_name=product.name, product_price=product.price, product_count=basket.count, overal_price=overal)
+                    await sync_to_async(basket.delete, thread_sensitive=True)()
+            except Exception as error:
+                print('error: ', error)        
+        
+        elif order_type == 'all': #! davomi
+            basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
+            # await sync_to_async(BasketMod.objects.filter(user=user_id).delete, thread_sensitive=True)()
         await call.message.answer(text=lang['order_yes'])
         await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
 
