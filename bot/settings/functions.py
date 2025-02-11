@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.exceptions import TelegramBadRequest
 from config.settings import PAGE_SIZE
-from bot.settings.buttons import CreateInline
+from bot.settings.buttons import CreateInline, Createreply
 
 
 async def get_admin():
@@ -18,6 +18,18 @@ def get_main_button(lang):
     return CreateInline({
         lang['product_btn']:'get_products', lang['set_lang']:f"set_language", 
         lang['my_basket']:'get_basket', lang['info']:'get_information'}, just=(1, 2, 1) )
+
+
+async def get_product(lang, user_filter):
+    category_filter = await sync_to_async(list, thread_sensitive=True)(CategoryMod.objects.all())
+
+    if user_filter.language == 'uz':
+        markup = Createreply(*(i.name_uz for i in category_filter), lang['back'])
+    elif user_filter.language == 'ru':    
+        markup = Createreply(*(i.name_ru for i in category_filter), lang['back'])
+    elif user_filter.language == 'en':    
+        markup = Createreply(*(i.name_en for i in category_filter), lang['back'])
+    return markup
 
 
 async def get_user_language(user_id: int) -> str:

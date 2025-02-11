@@ -64,18 +64,10 @@ async def send_phone(message: Message, state: FSMContext):
 async def get_categorys(call: CallbackQuery, state: FSMContext):
     user_id = call.from_user.id
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=user_id).first)()
-    category_filter = await sync_to_async(list, thread_sensitive=True)(CategoryMod.objects.all())
     lang = languages[user_filter.language]
-
-    if user_filter.language == 'uz':
-        markup = Createreply(*(i.name_uz for i in category_filter), lang['back'])
-    elif user_filter.language == 'ru':    
-        markup = Createreply(*(i.name_ru for i in category_filter), lang['back'])
-    elif user_filter.language == 'en':    
-        markup = Createreply(*(i.name_en for i in category_filter), lang['back'])
-    
+    keyboard = await get_product(lang, user_filter)    
     await call.message.delete()
-    await call.message.answer(text=lang['category_txt'], reply_markup=markup)
+    await call.message.answer(text=lang['category_txt'], reply_markup=keyboard)
     await state.set_state(User.category)
 
 
@@ -136,7 +128,7 @@ async def get_products(message: Message, state: FSMContext):
 
 
 @user_private_router.callback_query(lambda c: c.data.startswith("cat_"))
-async def pagination_callback(call: CallbackQuery):
+async def pagination_callback(call: CallbackQuery, state: FSMContext):
     action = call.data.split("_")
     category_id = int(action[1])
     user_filter = await sync_to_async(UserMod.objects.filter(user_id=call.from_user.id).first)()
@@ -192,9 +184,10 @@ async def pagination_callback(call: CallbackQuery):
         await send_products_by_category(call.message.bot, call.from_user.id, category_id, page, call.message.message_id, user_filter.language, call=call)
 
     elif action[2] == 'back':
+        keyboard = await get_product(lang, user_filter)    
         await call.message.delete()
-        lang = languages[user_filter.language]
-        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+        await call.message.answer(text=lang['category_txt'], reply_markup=keyboard)
+        await state.set_state(User.category)
 
 
 @user_private_router.callback_query(F.data == 'get_basket')
@@ -291,7 +284,6 @@ async def get_location(message: Message, state: FSMContext):
                 f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
                 f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {int(product.price) * int(basket.count)} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
             
-        
         elif order_type == 'all':
             basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
 
@@ -320,7 +312,6 @@ async def get_location(message: Message, state: FSMContext):
         except Exception as error:
             print('Xatolik:', error) 
         await state.clear()    
-    
     else: await message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))    
 
 
@@ -335,27 +326,37 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
     lang = await get_user_language(user_id=user_id)
     
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(location_id))
-    await call.answer(text='bajarildi')
+    await call.answer(text='bajarildi') #! text 
     await call.message.delete()
 
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(message_id))
     if action == 'yes':
+        user = await sync_to_async(UserMod.objects.get, thread_sensitive=True)(user_id=user_id)
         if order_type in ['less', 'one']:
             try:
                 basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first, thread_sensitive=True)()
                 if basket:
-                    user = await sync_to_async(UserMod.objects.get, thread_sensitive=True)(user_id=user_id)
                     product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
-                
                     overal = int(basket.count) * int(product.price)
                     await sync_to_async(OrderMod.objects.create)(user=user, product_name=product.name, product_price=product.price, product_count=basket.count, overal_price=overal)
                     await sync_to_async(basket.delete, thread_sensitive=True)()
+                else: print('basket is empty')    
             except Exception as error:
-                print('error: ', error)        
+                print('error: ', error)  
         
-        elif order_type == 'all': #! davomi
-            basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
-            # await sync_to_async(BasketMod.objects.filter(user=user_id).delete, thread_sensitive=True)()
+        elif order_type == 'all':
+            try:
+                basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
+                if basket:
+                    for object in basket:
+                        product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=object.product_id)  
+                        overal = int(object.count) * int(product.price)
+                        await sync_to_async(OrderMod.objects.create)(user=user, product_name=product.name, product_price=product.price, product_count=object.count, overal_price=overal)  
+                    await sync_to_async(BasketMod.objects.filter(user=user_id).delete, thread_sensitive=True)()        
+                else: print('basket is empty')    
+            except Exception as error:
+                print('error: ', error)  
+
         await call.message.answer(text=lang['order_yes'])
         await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
 
