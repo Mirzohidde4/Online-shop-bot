@@ -1,0 +1,6 @@
+.h1::before{
+    content: "";
+    width: 24px;
+    height: 24px;
+    background-image: url('../media/icons/account-box-fill.png');
+}
