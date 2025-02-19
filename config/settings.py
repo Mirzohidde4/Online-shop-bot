@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from django.templatetags.static import static
 from django.urls import reverse_lazy
@@ -21,11 +22,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
-    'unfold',
+    'jazzmin',   
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -112,9 +112,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -122,41 +121,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-UNFOLD = {
-    "SITE_TITLE": "Settings",
-    "SITE_HEADER": "Admin Panel",
-    "SITE_SYMBOL": "settings", # symbol next to site title
-    "SHOW_SITE_HEADER": True, # show/hide site header, default: True
-    "SHOW_HISTORY": True, # show/hide "History" button, default: True
-    "BORDER_RADIUS": "6px",   
-    
-    "SIDEBAR": {
-        "show_search": True,  # Search in applications and models names
-        "show_all_applications": False,  # Dropdown with all applications and models
-    }
+JAZZMIN_SETTINGS = {
+    "site_title": "Settings",
+    "site_header": "Admin panel",
+    "site_brand": "Admin panel",
+    "welcome_sign": "Xush kelibsiz!",
+    "copyright": "My Company",
+    "search_model": ["main.ProductMod", "main.UserMod"],
+    "show_ui_builder": True,  # UI Builder ni yoqish
+    "changeform_format": "horizontal_tabs",  # Model ichidagi sahifalarni tartibga solish
+    "navigation_expanded": False,
 }
-
-def dashboard_callback(request, context):
-    """
-    Callback to prepare custom variables for index template which is used as dashboard
-    template. It can be overridden in application by creating custom admin/index.html.
-    """
-    context.update(
-        {
-            "sample": "example",  # this will be injected into templates/admin/index.html
-        }
-    )
-    return context
-
-def environment_callback(request):
-    """
-    Callback has to return a list of two values represeting text value and the color
-    type of the label displayed in top right corner.
-    """
-    return ["Production", "danger"] # info, danger, warning, success
-
-def badge_callback(request):
-    return 3
-
-def permission_callback(request):
-    return request.user.has_perm("sample_app.change_model")
