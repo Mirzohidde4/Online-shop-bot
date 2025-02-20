@@ -50,3 +50,14 @@ class AdminAdminMod(ModelAdmin):
 @admin.register(OrderMod)
 class AdminOrder(ModelAdmin):
     list_display = ('user', 'product_name', 'created_at')
+
+
+@admin.register(DiscountMod)
+class AdminDiscountMod(ModelAdmin): 
+    list_display = ('discount_price', 'discount_percent', 'created_at')
+
+    def has_add_permission(self, request):
+        if DiscountMod.objects.count() >= 1:
+            return False
+        else:
+            return True 

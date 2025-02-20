@@ -81,3 +81,13 @@ class OrderMod(models.Model):
     class Meta:
         verbose_name = 'Buyurtma'
         verbose_name_plural = 'Buyurtmalar'
+
+
+class DiscountMod(models.Model):
+    discount_price = models.PositiveIntegerField(verbose_name="chegirma narxi")
+    discount_percent = models.PositiveIntegerField(verbose_name="chegirma foizi")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='sana', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Chegirma'
+        verbose_name_plural = 'Chegirmalar'
