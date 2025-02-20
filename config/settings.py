@@ -130,5 +130,7 @@ JAZZMIN_SETTINGS = {
     "search_model": ["main.ProductMod", "main.UserMod"],
     "show_ui_builder": True,  # UI Builder ni yoqish
     "changeform_format": "horizontal_tabs",  # Model ichidagi sahifalarni tartibga solish
-    "navigation_expanded": False,
+    "navigation_expanded": False, 
+    "hide_apps": ["auth"],  # Auth bo‘limini yashirish
+    "hide_models": ["auth.User", "auth.Group"],
 }
