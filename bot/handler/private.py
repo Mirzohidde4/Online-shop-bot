@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.command import CommandStart
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from asgiref.sync import sync_to_async
-from main.models import UserMod, CategoryMod, ProductMod, BasketMod, OrderMod
+from main.models import UserMod, CategoryMod, ProductMod, BasketMod, OrderMod, DiscountMod
 from ..settings.states import User
 from ..settings.buttons import CreateInline, Createreply
 from ..settings.languages import languages
@@ -291,12 +291,19 @@ async def get_location(message: Message, state: FSMContext):
                     f"<b>Продукты:</b>" if admin.language == 'ru' else \
                     f"<b>Products:</b>" 
             prices = 0
-        
+            
             for item in basket:
                 product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=item.product_id)
                 products += f" <b>{product.name}</b>({item.count}),"
                 prices += int(product.price) * int(item.count)
+
+            discount = await sync_to_async(DiscountMod.objects.first, thread_sensitive=True)()
+            if discount:
+                if int(prices) > discount.discount_price:
+                    percent = int(prices) * discount.discount_percent / 100    
+                    discount_price = int(prices) - percent
             
+            #! textga skitkani qoshish
             text = f"{products}\n\n<b>Narxi:</b> {prices} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
                 f"{products}\n\n<b>Цена:</b> {prices} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
                 f"{products}\n\n<b>Price:</b> {prices} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"

@@ -76,6 +76,19 @@ DATABASES = {
     }
 }
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Settings",
+    "site_header": "Admin panel",
+    "site_brand": "Admin panel",
+    "welcome_sign": "Xush kelibsiz!",
+    "copyright": "My Company",
+    "search_model": ["main.ProductMod", "main.UserMod"],
+    "show_ui_builder": True,  # UI Builder ni yoqish
+    "changeform_format": "horizontal_tabs",  # Model ichidagi sahifalarni tartibga solish
+    "navigation_expanded": False, 
+    "hide_apps": ["auth"],  # Auth bo‘limini yashirish
+    "hide_models": ["auth.User", "auth.Group"],
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -119,18 +132,3 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-JAZZMIN_SETTINGS = {
-    "site_title": "Settings",
-    "site_header": "Admin panel",
-    "site_brand": "Admin panel",
-    "welcome_sign": "Xush kelibsiz!",
-    "copyright": "My Company",
-    "search_model": ["main.ProductMod", "main.UserMod"],
-    "show_ui_builder": True,  # UI Builder ni yoqish
-    "changeform_format": "horizontal_tabs",  # Model ichidagi sahifalarni tartibga solish
-    "navigation_expanded": False, 
-    "hide_apps": ["auth"],  # Auth bo‘limini yashirish
-    "hide_models": ["auth.User", "auth.Group"],
-}
