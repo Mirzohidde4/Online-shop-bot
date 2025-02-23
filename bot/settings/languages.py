@@ -32,12 +32,13 @@ languages = {
         'order_info': '🔘 Barchasini buyurtma qilasizmi yoki faqat shuni?',
         'one': 'faqat shuni',
         'all': 'barchasi',
-        'order_yes': '✅ Buyurtmangiz qabul qilindi.',
+        'order_yes': '✅ Buyurtmangiz qabul qilindi!\nUmumiy narx: number so\'m',
         'order_no': '❌ Buyurtmangiz qabul qilinmadi.',
         
         'new_order': 'Yangi buyurtma',
         'yes': '✅ Tasdiqlash',
         'no': '❌ Bekor qilish',
+        'done': 'Bajarildi',
         
         'previous_pg': '⬅️ Oldingi',
         'next_pg': 'Keyingi ➡️',
@@ -46,8 +47,7 @@ languages = {
         'ban_cnt': 'kamaytira olmaysiz',
         
         'location_txt': '📍 Joylashuvingizni yuboring',
-        'get_location': '📍 Joylashuvni yuborish',
-        
+        'get_location': '📍 Joylashuvni yuborish',   
     },
     'ru': {
         'start': f"👋 Здравствуйте {'full_name'}, вы можете сделать заказ!",
@@ -82,12 +82,13 @@ languages = {
         'order_request': f"Ваш заказ обрабатывается...",
         'one': 'только это',
         'all': 'все',
-        'order_yes': '✅ Ваш заказ принят!',
+        'order_yes': '✅ Ваш заказ принят!\nОбщая стоимость: number сум',
         'order_no': '❌ Ваш заказ не принят!',
         
         'new_order': 'Новый заказ',
         'yes': '✅ Подтвердить',
         'no': '❌ Отказаться',
+        'done': 'Выполнено',
         
         'previous_pg': '⬅️ Предыдущая',
         'next_pg': '➡️ Следующая',
@@ -96,8 +97,7 @@ languages = {
         'ban_cnt': 'нельзя уменьшить',
         
         'location_txt': '📍 Отправьте свое местоположение',
-        'get_location': '📍 Отправить местоположение',
-        
+        'get_location': '📍 Отправить местоположение',   
     },
     'en': {
         'start': f"👋 Hello {'full_name'}, you can place an order!",
@@ -132,12 +132,13 @@ languages = {
         'order_request': f"Your order is being processed...",
         'one': 'this one',
         'all': 'all',
-        'order_yes': '✅ Your order accepted!',
+        'order_yes': "✅ Your order accepted!\ntotal price: number sum",
         'order_no': '❌ Your order rejected!',
         
         'new_order': 'New order',
         'yes': '✅ Confirm',
         'no': '❌ Decline',
+        'done': 'Done',
         
         'previous_pg': '⬅️ Previous',
         'next_pg': '➡️ Next',
@@ -147,6 +148,5 @@ languages = {
         
         'location_txt': '📍 Send your location',
         'get_location': '📍 Send location',
-        
     }
 }

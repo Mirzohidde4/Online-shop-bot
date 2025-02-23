@@ -30,7 +30,7 @@ class AdminProductMod(admin.ModelAdmin):
 @admin.register(BasketMod)
 class AdminBasketMod(admin.ModelAdmin):
     list_display = ('user', 'product', 'category', 'count', 'created_at')
-    list_filter = ('user', 'category', 'product')
+    list_filter = ('user', 'product')
     search_fields = ('user',)
 
 
@@ -49,6 +49,8 @@ class AdminAdminMod(admin.ModelAdmin):
 @admin.register(OrderMod)
 class AdminOrder(admin.ModelAdmin):
     list_display = ('user', 'product_name', 'created_at')
+    list_filter = ('user', 'created_at')
+    search_fields = ('user',)
 
 
 @admin.register(DiscountMod)

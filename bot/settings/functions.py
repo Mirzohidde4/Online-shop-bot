@@ -1,5 +1,5 @@
 from asgiref.sync import sync_to_async
-from main.models import UserMod, ProductMod, CategoryMod, BasketMod, AdminMod
+from main.models import *
 from ..settings.languages import languages
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InputMediaPhoto, FSInputFile
@@ -143,3 +143,14 @@ async def send_products_by_user(bot: Bot, chat_id, page, message_id=None, lang='
             else: await bot.send_photo(chat_id=chat_id, photo=media, caption=text, reply_markup=keyboard)
         except TelegramBadRequest as e:
             if "Message is not modified" not in str(e): raise
+
+
+async def get_discount(price):
+    discount = await sync_to_async(DiscountMod.objects.first, thread_sensitive=True)()
+    discount_price = price 
+
+    if discount and int(price) > discount.discount_price:
+        percent = int(price) * discount.discount_percent / 100    
+        discount_price = int(price) - percent
+
+    return f"<i><del>{price}</del></i>  <b>{'%.2f' % discount_price}</b>" if discount_price != price else f"<b>{'%.2f' % price}</b>"

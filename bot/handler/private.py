@@ -123,7 +123,7 @@ async def get_products(message: Message, state: FSMContext):
     if user_filter.language == 'en':
         category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
     
-    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.id, page=1, lang=user_filter.language)
+    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.pk, page=1, lang=user_filter.language)
     await state.clear()
 
 
@@ -267,22 +267,26 @@ async def get_location(message: Message, state: FSMContext):
             region = address.get("state", None)
             result = f"{city}, {region if region else ''}"
         else: result = None
-        
+
         if order_type == 'less': 
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.get, thread_sensitive=True)(user=user_id, product=product_id)
+            price = await get_discount(price=int(product.price) * int(basket.count))
+            await state.update_data({'price': price})
 
-            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {int(product.price) * int(basket.count)} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {price} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
 
         elif order_type == 'one':   
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first, thread_sensitive=True)()
+            price = await get_discount(price=int(product.price) * int(basket.count))
+            await state.update_data({'price': price})
 
-            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {int(product.price) * int(basket.count)} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {int(product.price) * int(basket.count)} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {int(product.price) * int(basket.count)} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+            text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"<b>Name:</b> {product.name}\n<b>Count:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Price:</b> {price} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
             
         elif order_type == 'all':
             basket = await sync_to_async(list, thread_sensitive=True)(BasketMod.objects.filter(user=user_id).all())
@@ -297,16 +301,12 @@ async def get_location(message: Message, state: FSMContext):
                 products += f" <b>{product.name}</b>({item.count}),"
                 prices += int(product.price) * int(item.count)
 
-            discount = await sync_to_async(DiscountMod.objects.first, thread_sensitive=True)()
-            if discount:
-                if int(prices) > discount.discount_price:
-                    percent = int(prices) * discount.discount_percent / 100    
-                    discount_price = int(prices) - percent
-            
-            #! textga skitkani qoshish
-            text = f"{products}\n\n<b>Narxi:</b> {prices} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
-                f"{products}\n\n<b>Цена:</b> {prices} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
-                f"{products}\n\n<b>Price:</b> {prices} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
+            price = await get_discount(price=prices)
+            await state.update_data({'price': price})
+
+            text = f"{products}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
+                f"{products}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
+                f"{products}\n\n<b>Price:</b> {price} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
 
         try: 
             message_to_user = await message.bot.send_message(chat_id=user_id, text=text_to_user, reply_markup=ReplyKeyboardRemove())
@@ -318,12 +318,14 @@ async def get_location(message: Message, state: FSMContext):
         
         except Exception as error:
             print('Xatolik:', error) 
-        await state.clear()    
     else: await message.answer(text=lang['location_txt'], reply_markup=Createreply(lang['get_location'], location=True))    
 
 
 @user_private_router.callback_query(F.data.startswith('order_'))
 async def orders_callback(call: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    price = data.get('price')
+    admin = await get_admin()
     action = call.data.split("_")[1]
     order_type = call.data.split("_")[2]
     user_id = call.data.split("_")[3]
@@ -333,7 +335,7 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
     lang = await get_user_language(user_id=user_id)
     
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(location_id))
-    await call.answer(text='bajarildi') #! text 
+    await call.answer(text=languages[admin.language]['done'])
     await call.message.delete()
 
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(message_id))
@@ -364,8 +366,9 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
             except Exception as error:
                 print('error: ', error)  
 
-        await call.message.answer(text=lang['order_yes'])
+        await call.message.answer(text=lang['order_yes'].replace('number', price))
         await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+        await state.clear()    
 
     elif action == 'no':
         await call.message.answer(text=lang['order_no'])
