@@ -51,8 +51,9 @@ async def send_phone(message: Message, state: FSMContext):
     language = data.get('language')
     
     if message.contact and message.contact.phone_number:
+        phone_number = message.contact.phone_number if message.contact.phone_number.startswith('+') else f"+{message.contact.phone_number}"
         await sync_to_async(UserMod.objects.create)(user_id=user_id, user_name=username, 
-            full_name=full_name, language=language, phone=message.contact.phone_number)
+            full_name=full_name, language=language, phone=phone_number)
         await state.clear()
         await message.answer(text=languages[language]['start'].replace('full_name', full_name), 
             reply_markup=get_main_button(lang=languages[language]))
@@ -115,16 +116,16 @@ async def get_products(message: Message, state: FSMContext):
 
     if message.text in ['🔙 Back', '🔙 Назад', '🔙 Orqaga']:
         await message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
-
-    if user_filter.language == 'uz':
-        category_filter = await sync_to_async(CategoryMod.objects.filter(name_uz=category).first)()
-    if user_filter.language == 'ru':
-        category_filter = await sync_to_async(CategoryMod.objects.filter(name_ru=category).first)()
-    if user_filter.language == 'en':
-        category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
+    else:
+        if user_filter.language == 'uz':
+            category_filter = await sync_to_async(CategoryMod.objects.filter(name_uz=category).first)()
+        elif user_filter.language == 'ru':
+            category_filter = await sync_to_async(CategoryMod.objects.filter(name_ru=category).first)()
+        elif user_filter.language == 'en':
+            category_filter = await sync_to_async(CategoryMod.objects.filter(name_en=category).first)()
     
-    await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.pk, page=1, lang=user_filter.language)
-    await state.clear()
+        await send_products_by_category(bot=message.bot, chat_id=user_id, category_id=category_filter.pk, page=1, lang=user_filter.language)
+        await state.clear()
 
 
 @user_private_router.callback_query(lambda c: c.data.startswith("cat_"))
@@ -272,7 +273,6 @@ async def get_location(message: Message, state: FSMContext):
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.get, thread_sensitive=True)(user=user_id, product=product_id)
             price = await get_discount(price=int(product.price) * int(basket.count))
-            await state.update_data({'price': price})
 
             text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
                 f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
@@ -282,7 +282,6 @@ async def get_location(message: Message, state: FSMContext):
             product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=product_id)
             basket = await sync_to_async(BasketMod.objects.filter(product=product_id, user=user_id).first, thread_sensitive=True)()
             price = await get_discount(price=int(product.price) * int(basket.count))
-            await state.update_data({'price': price})
 
             text = f"<b>Nomi:</b> {product.name}\n<b>Miqdori:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
                 f"<b>Название:</b> {product.name}\n<b>Количество:</b> {basket.count} {languages[admin.language]['quantity']}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
@@ -300,15 +299,14 @@ async def get_location(message: Message, state: FSMContext):
                 product = await sync_to_async(ProductMod.objects.get, thread_sensitive=True)(id=item.product_id)
                 products += f" <b>{product.name}</b>({item.count}),"
                 prices += int(product.price) * int(item.count)
-
             price = await get_discount(price=prices)
-            await state.update_data({'price': price})
 
             text = f"{products}\n\n<b>Narxi:</b> {price} so'm\n<b>Mijoz:</b> {user}\n<b>Telefon:</b> {user_filter.phone}" if admin.language == 'uz' else \
                 f"{products}\n\n<b>Цена:</b> {price} сум\n<b>Клиент:</b> {user}\n<b>Телефон:</b> {user_filter.phone}" if admin.language == 'ru' else \
                 f"{products}\n\n<b>Price:</b> {price} sum\n<b>Customer:</b> {user}\n<b>Telephone</b> {user_filter.phone}"
 
         try: 
+            await state.update_data({'price': price})
             message_to_user = await message.bot.send_message(chat_id=user_id, text=text_to_user, reply_markup=ReplyKeyboardRemove())
             
             location = await message.bot.send_venue(chat_id=admin.telegram_id, latitude=message.location.latitude, 
@@ -334,10 +332,9 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
     location_id = call.data.split("_")[6]
     lang = await get_user_language(user_id=user_id)
     
-    await call.message.bot.delete_message(chat_id=user_id, message_id=int(location_id))
+    await call.message.bot.delete_message(chat_id=admin.telegram_id, message_id=int(location_id))
     await call.answer(text=languages[admin.language]['done'])
     await call.message.delete()
-
     await call.message.bot.delete_message(chat_id=user_id, message_id=int(message_id))
     if action == 'yes':
         user = await sync_to_async(UserMod.objects.get, thread_sensitive=True)(user_id=user_id)
@@ -366,11 +363,11 @@ async def orders_callback(call: CallbackQuery, state: FSMContext):
             except Exception as error:
                 print('error: ', error)  
 
-        await call.message.answer(text=lang['order_yes'].replace('number', price))
-        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+        await call.message.bot.send_message(chat_id=user_id, text=lang['order_yes'])
+        await call.message.bot.send_message(chat_id=user_id, text=lang['main'], reply_markup=get_main_button(lang=lang))
         await state.clear()    
 
     elif action == 'no':
-        await call.message.answer(text=lang['order_no'])
-        await call.message.answer(text=lang['main'], reply_markup=get_main_button(lang=lang))
+        await call.message.bot.send_message(chat_id=user_id, text=lang['order_no'])
+        await call.message.bot.send_message(chat_id=user_id, text=lang['main'], reply_markup=get_main_button(lang=lang))
     

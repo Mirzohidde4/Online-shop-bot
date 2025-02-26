@@ -32,7 +32,7 @@ languages = {
         'order_info': '🔘 Barchasini buyurtma qilasizmi yoki faqat shuni?',
         'one': 'faqat shuni',
         'all': 'barchasi',
-        'order_yes': '✅ Buyurtmangiz qabul qilindi!\nUmumiy narx: number so\'m',
+        'order_yes': '✅ Buyurtmangiz qabul qilindi!',
         'order_no': '❌ Buyurtmangiz qabul qilinmadi.',
         
         'new_order': 'Yangi buyurtma',
@@ -82,7 +82,7 @@ languages = {
         'order_request': f"Ваш заказ обрабатывается...",
         'one': 'только это',
         'all': 'все',
-        'order_yes': '✅ Ваш заказ принят!\nОбщая стоимость: number сум',
+        'order_yes': '✅ Ваш заказ принят!',
         'order_no': '❌ Ваш заказ не принят!',
         
         'new_order': 'Новый заказ',
@@ -132,7 +132,7 @@ languages = {
         'order_request': f"Your order is being processed...",
         'one': 'this one',
         'all': 'all',
-        'order_yes': "✅ Your order accepted!\ntotal price: number sum",
+        'order_yes': "✅ Your order accepted!",
         'order_no': '❌ Your order rejected!',
         
         'new_order': 'New order',
